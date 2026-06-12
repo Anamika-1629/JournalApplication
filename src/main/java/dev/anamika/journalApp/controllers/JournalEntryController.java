@@ -1,42 +1,57 @@
 package dev.anamika.journalApp.controllers;
 
 import dev.anamika.journalApp.models.JournalEntry;
+import dev.anamika.journalApp.repositories.JournalEntryRepository;
+import dev.anamika.journalApp.services.JournalEntryService;
+import org.bson.types.ObjectId;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.time.LocalDateTime;
+import java.util.*;
 
 @RestController
 @RequestMapping("/journal")
 public class JournalEntryController {
 
-    private final Map<Long, JournalEntry> journalEntries = new HashMap<>();
+    @Autowired
+    private JournalEntryService journalEntryService;
 
     @GetMapping("/journal-entries")
     public List<JournalEntry> getAll(){
-        return new ArrayList<>(journalEntries.values());
+        return journalEntryService.getAllEntries();
     }
 
     @PostMapping("/create-entries")
-    public boolean createEntry(@RequestBody JournalEntry myEntry){
-        journalEntries.put(myEntry.getId(), myEntry);
+    public JournalEntry createEntry(@RequestBody JournalEntry myEntry){
+        myEntry.setCreatedAt(LocalDateTime.now());
+        journalEntryService.saveEntry(myEntry);
+        return myEntry;
+    }
+
+    @GetMapping("/v1/find-entry/{id}")
+    public Optional<JournalEntry> getEntryById(@PathVariable ObjectId id){
+        return journalEntryService.getOneEntry(id);
+    }
+
+    @DeleteMapping("/v1/del-entry/{id}")
+    public boolean delEntryById(@PathVariable ObjectId id){
+        journalEntryService.delEntry(id);
         return true;
     }
 
-    @GetMapping("/id/{id}")
-    public JournalEntry getEntryById(@PathVariable long id){
-        return journalEntries.get(id);
-    }
+    @PutMapping("/v1/update-entry/{id}")
+    public JournalEntry updateEntryById(@PathVariable ObjectId id, @RequestBody JournalEntry newEntry){
+        JournalEntry old = journalEntryService.getOneEntry(id).orElse(null);
+        if (old != null) {
+            old.setUpdatedAt(LocalDateTime.now());
+            old.setTitle(newEntry.getTitle() != null && !newEntry.getTitle().equals("") ? newEntry.getTitle() : old.getTitle());
+            old.setContent(newEntry.getContent() != null && !newEntry.getContent().equals("") ? newEntry.getContent() : old.getContent());
 
-    @DeleteMapping("/id/{id}")
-    public boolean delEntryById(@PathVariable long id){
-        return true;
-    }
-
-    @PutMapping("/id/{id}")
-    public JournalEntry updateEntryById(@PathVariable long id, @RequestBody JournalEntry myEntry){
-        return journalEntries.put(id, myEntry);
+            journalEntryService.saveEntry(old);
+            return old;
+        }
+        return null;
     }
 }
