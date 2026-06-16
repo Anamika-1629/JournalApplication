@@ -4,6 +4,7 @@ import dev.anamika.journalApp.models.Users;
 import dev.anamika.journalApp.repositories.UserRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,6 +16,9 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public List<Users> getAllUsers(){
         return userRepository.findAll();
     }
@@ -24,6 +28,7 @@ public class UserService {
     }
 
     public void saveUser(Users user){
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
     }
 
