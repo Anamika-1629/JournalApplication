@@ -9,12 +9,13 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DocumentReference;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Document(collection = "users")
+@Document(collection = "Users")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -28,7 +29,7 @@ public class Users {
     @NonNull
     private String password;
 
-    @DBRef
+    @DocumentReference
     private List<JournalEntry> entryIDs = new ArrayList<>();
 
     private List<String> roles;
