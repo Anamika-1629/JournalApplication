@@ -5,8 +5,10 @@ import dev.anamika.journalApp.repositories.JournalEntryRepository;
 import dev.anamika.journalApp.repositories.UserRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -40,22 +42,20 @@ public class UserService {
 
     public Users updateUser(Users u, String username){
         Users user = userRepository.findByUserName(username).orElse(null);
-        if (user != null){
-            user.setUserName(!u.getUserName().isEmpty() ? u.getUserName() : user.getUserName());
-            user.setPassword(!u.getPassword().isEmpty() ? u.getPassword() : user.getPassword());
-            userRepository.save(user);
-            return user;
-        }
-        return null;
+        if (user == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found");
+
+        if (u.getUserName() != null && !u.getUserName().isEmpty()) user.setUserName(u.getUserName());
+        if (u.getPassword() != null && !u.getPassword().isEmpty()) user.setPassword(passwordEncoder.encode(u.getPassword()));
+
+        userRepository.save(user);
+        return user;
     }
 
-    public boolean deleteUser(String userName){
-        Users user = userRepository.findByUserName(userName).orElse(null);
-        if (user == null) return false;
+    public void deleteUser(String userName){
+        Users user = userRepository.findByUserName(userName).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found"));
 
         journalEntryRepository.deleteAll(user.getEntryIDs());
         userRepository.delete(user);
-        return true;
     }
 
     public Optional<Users> findByUsername(String userName){
