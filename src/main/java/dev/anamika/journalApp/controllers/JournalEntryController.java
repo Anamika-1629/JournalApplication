@@ -1,20 +1,15 @@
 package dev.anamika.journalApp.controllers;
 
 import dev.anamika.journalApp.models.JournalEntry;
-import dev.anamika.journalApp.models.Users;
-import dev.anamika.journalApp.repositories.JournalEntryRepository;
 import dev.anamika.journalApp.services.JournalEntryService;
-import dev.anamika.journalApp.services.UserService;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 @RestController
@@ -24,15 +19,9 @@ public class JournalEntryController {
     @Autowired
     private JournalEntryService journalEntryService;
 
-    @Autowired
-    private UserService userService;
-
     @GetMapping("/v1/journal-entries")
     public ResponseEntity<List<JournalEntry>> getAll(Authentication authentication){
-        Users user = userService.findByUsername(authentication.getName()).orElse(null);
-        if (user != null) return new ResponseEntity<>(user.getEntryIDs(), HttpStatus.OK);
-
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return ResponseEntity.ok(journalEntryService.getAllEntries(authentication.getName()));
     }
 
     @PostMapping("/v1/create-entries")

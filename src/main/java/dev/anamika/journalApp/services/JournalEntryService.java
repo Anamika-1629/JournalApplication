@@ -3,7 +3,6 @@ package dev.anamika.journalApp.services;
 import dev.anamika.journalApp.models.JournalEntry;
 import dev.anamika.journalApp.models.Users;
 import dev.anamika.journalApp.repositories.JournalEntryRepository;
-import org.apache.catalina.User;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,7 +24,7 @@ public class JournalEntryService {
     private UserService userService;
 
     private Users validateOwnership(String userName, ObjectId id){
-        Users u = userService.findByUsername(userName).orElseThrow(() -> new RuntimeException("User not found"));
+        Users u = userService.findByUsername(userName).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         boolean owns = u.getEntryIDs().stream().anyMatch(e -> e.getId().equals(id));
         if (!owns) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access Denied");
@@ -33,8 +32,9 @@ public class JournalEntryService {
         return u;
     }
 
-    public List<JournalEntry> getAllEntries(){
-        return journalEntryRepository.findAll();
+    public List<JournalEntry> getAllEntries(String userName){
+        Users user = userService.findByUsername(userName).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        return user.getEntryIDs();
     }
 
     public Optional<JournalEntry> getOneEntry(ObjectId id, String userName){
