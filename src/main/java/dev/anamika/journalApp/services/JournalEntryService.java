@@ -61,8 +61,6 @@ public class JournalEntryService {
     public void deleteEntry(ObjectId id, String userName){
         Users user = validateOwnership(userName, id);
 
-        JournalEntry old = journalEntryRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entry Not Found"));
-
         user.getEntryIDs().removeIf(e -> e.getId().equals(id));
         userService.saveUser(user);
         journalEntryRepository.deleteById(id);
