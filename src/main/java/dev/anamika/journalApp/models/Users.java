@@ -1,6 +1,7 @@
 package dev.anamika.journalApp.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,7 +26,8 @@ public class Users {
     @Indexed(unique = true)
     @NonNull
     private String userName;
-    @NonNull @JsonIgnore
+
+    @NonNull @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     @DocumentReference
