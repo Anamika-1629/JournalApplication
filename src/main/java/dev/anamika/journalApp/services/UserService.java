@@ -42,7 +42,7 @@ public class UserService {
 
     public void saveUser(Users user){
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRoles(Arrays.asList("USER"));
+        user.setRoles(List.of("USER"));
         userRepository.save(user);
     }
 
@@ -82,11 +82,5 @@ public class UserService {
 
         user.setRoles(roles);
         userRepository.save(user); return true;
-    }
-
-    public void saveAdmin(Users u) {
-        u.setPassword(passwordEncoder.encode(u.getPassword()));
-        u.setRoles(Arrays.asList("USER", "ADMIN"));
-        userRepository.save(u);
     }
 }
