@@ -1,15 +1,16 @@
 package dev.anamika.journalApp.controllers;
 
 import dev.anamika.journalApp.dto.JournalEntryRequest;
-import dev.anamika.journalApp.models.JournalEntry;
+import dev.anamika.journalApp.dto.JournalEntryUpdateRequest;
+import dev.anamika.journalApp.dto.JournalEntryResponse;
 import dev.anamika.journalApp.services.JournalEntryService;
+import jakarta.validation.Valid;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
@@ -21,19 +22,19 @@ public class JournalEntryController {
     private JournalEntryService journalEntryService;
 
     @PostMapping("/v1/create-entries")
-    public ResponseEntity<JournalEntry> createEntry(@RequestBody JournalEntry myEntry, Authentication authentication){
-        JournalEntry saved = journalEntryService.saveEntry(myEntry, authentication.getName());
+    public ResponseEntity<JournalEntryResponse> createEntry(@Valid @RequestBody JournalEntryRequest myEntry, Authentication authentication){
+        JournalEntryResponse saved = journalEntryService.saveEntry(myEntry, authentication.getName());
         return new ResponseEntity<>(saved, HttpStatus.CREATED);
     }
 
     @GetMapping("/v1/journal-entries")
-    public ResponseEntity<List<JournalEntry>> getAll(Authentication authentication){
+    public ResponseEntity<List<JournalEntryResponse>> getAll(Authentication authentication){
         return ResponseEntity.ok(journalEntryService.getAllEntries(authentication.getName()));
     }
 
     @GetMapping("/v1/find-entry/{id}")
-    public ResponseEntity<JournalEntry> getEntryById(@PathVariable ObjectId id, Authentication authentication){
-        JournalEntry entry = journalEntryService.getOneEntry(id, authentication.getName()).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entry Not Found"));
+    public ResponseEntity<JournalEntryResponse> getEntryById(@PathVariable ObjectId id, Authentication authentication){
+        JournalEntryResponse entry = journalEntryService.getOneEntry(id, authentication.getName());
         return new ResponseEntity<>(entry, HttpStatus.OK);
     }
 
@@ -43,9 +44,9 @@ public class JournalEntryController {
         return ResponseEntity.noContent().build();
     }
 
-    @PutMapping("/v1/update-entry/{id}")
-    public ResponseEntity<JournalEntry> updateEntryById(@PathVariable ObjectId id, @RequestBody JournalEntryRequest newEntry, Authentication authentication){
-        JournalEntry entry = journalEntryService.updateEntry(id, authentication.getName(), newEntry);
-        return new ResponseEntity<>(entry, HttpStatus.OK);
+    @PatchMapping("/v1/update-entry/{id}")
+    public ResponseEntity<JournalEntryResponse> updateEntryById(@PathVariable ObjectId id, @Valid @RequestBody JournalEntryUpdateRequest newEntry, Authentication authentication) {
+        JournalEntryResponse entry = journalEntryService.updateEntry(id, authentication.getName(), newEntry);
+        return ResponseEntity.ok(entry);
     }
 }

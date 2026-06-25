@@ -1,12 +1,9 @@
 package dev.anamika.journalApp.dto;
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class JournalEntryRequest {
-    @NotBlank
+public class JournalEntryUpdateRequest {
     private String title;
-    @NotBlank
     private String content;
 }
