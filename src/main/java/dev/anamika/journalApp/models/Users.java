@@ -22,15 +22,25 @@ public class Users {
     @Id
     private ObjectId id;
 
+    private String firstName;
+
+    private String lastName;
+
     @Indexed(unique = true)
     @NonNull
     private String userName;
 
-    @NonNull @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String email;
+
+    @NonNull
     private String password;
 
     @DocumentReference
     private List<JournalEntry> entryIDs = new ArrayList<>();
 
     private List<String> roles;
+
+    private boolean emailVerified;
+
+    private String provider;
 }
