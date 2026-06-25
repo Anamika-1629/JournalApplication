@@ -5,7 +5,6 @@ import dev.anamika.journalApp.models.Users;
 import dev.anamika.journalApp.repositories.JournalEntryRepository;
 import dev.anamika.journalApp.repositories.UserRepository;
 import dev.anamika.journalApp.utils.JwtUtils;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -50,31 +49,33 @@ public class UserService {
     }
 
     //Public controller -> login api
-    public String login(@Valid AuthRequest request) {
+    public String login(AuthRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUserName(), request.getPassword()));
         return jwtUtils.generateToken(request.getUserName());
     }
 
     //Save user method
-    public void saveUser(Users user){
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        user.setRoles(List.of("USER"));
+    public void saveExistingUser(Users user){
         userRepository.save(user);
     }
 
     //User controller -> update user api
-    public Users updateUser(UpdateUser dto, String username){
-        Users user = userRepository.findByUserName(username).orElse(null);
-        if (user == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found");
+    public UserResponse updateUser(UpdateUser dto, String username) {
+        Users user = userRepository.findByUserName(username)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found"));
 
-        if (dto.getUserName() != null && !dto.getUserName().isEmpty()) user.setUserName(dto.getUserName());
-        if (dto.getEmail() != null && !dto.getEmail().isEmpty()) user.setEmail(dto.getEmail());
-        if (dto.getFirstName() != null && !dto.getFirstName().isEmpty()) user.setFirstName(dto.getFirstName());
-        if (dto.getLastName() != null && !dto.getLastName().isEmpty()) user.setLastName(dto.getLastName());
+        if (dto.getUserName() != null && !dto.getUserName().isBlank())
+            user.setUserName(dto.getUserName());
+        if (dto.getEmail() != null && !dto.getEmail().isBlank())
+            user.setEmail(dto.getEmail());
+        if (dto.getFirstName() != null && !dto.getFirstName().isBlank())
+            user.setFirstName(dto.getFirstName());
+        if (dto.getLastName() != null && !dto.getLastName().isBlank())
+            user.setLastName(dto.getLastName());
 
         userRepository.save(user);
-        return user;
+        return mapToResponse(user);
     }
 
     //User controller -> change password api
@@ -115,7 +116,7 @@ public class UserService {
     }
 
     //Admin controller -> update role of the users
-    public boolean updateRoles(String username, List<String> roles){
+    public UserResponse updateRoles(String username, List<String> roles){
         Users user = userRepository.findByUserName(username).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         if (user.getRoles().contains("ADMIN") && !roles.contains("ADMIN"))
@@ -128,7 +129,9 @@ public class UserService {
         if (roles.isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Role list can't be empty");
 
         user.setRoles(roles);
-        userRepository.save(user); return true;
+
+        Users updatedUser = userRepository.save(user);
+        return mapToResponse(updatedUser);
     }
 
     public Optional<Users> findByUsername(String userName){

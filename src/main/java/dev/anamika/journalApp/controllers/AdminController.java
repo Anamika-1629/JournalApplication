@@ -22,8 +22,7 @@ public class AdminController {
     }
 
     @PutMapping("v1/users/{username}/update-role")
-    public ResponseEntity<?> updateRoles(@RequestBody List<String> roles, @PathVariable String username){
-        System.out.println("Update role endpoint hit");
+    public ResponseEntity<UserResponse> updateRoles(@RequestBody List<String> roles, @PathVariable String username){
         return ResponseEntity.ok(userService.updateRoles(username, roles));
     }
 }
