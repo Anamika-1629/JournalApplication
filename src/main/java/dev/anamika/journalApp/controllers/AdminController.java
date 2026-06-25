@@ -1,5 +1,6 @@
 package dev.anamika.journalApp.controllers;
 
+import dev.anamika.journalApp.dto.UserResponse;
 import dev.anamika.journalApp.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -7,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/admin")
@@ -17,7 +17,7 @@ public class AdminController {
     private UserService userService;
 
     @GetMapping("v1/find-all")
-    public ResponseEntity<List<Map<String, Object>>> findAllUsers(){
+    public ResponseEntity<List<UserResponse>> findAllUsers(){
         return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
     }
 
