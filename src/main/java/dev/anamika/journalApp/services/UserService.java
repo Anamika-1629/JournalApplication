@@ -6,7 +6,6 @@ import dev.anamika.journalApp.repositories.JournalEntryRepository;
 import dev.anamika.journalApp.repositories.UserRepository;
 import dev.anamika.journalApp.utils.JwtUtils;
 import jakarta.validation.Valid;
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -134,9 +133,5 @@ public class UserService {
 
     public Optional<Users> findByUsername(String userName){
         return userRepository.findByUserName(userName);
-    }
-
-    public Optional<Users> getOneUser(ObjectId id){
-        return userRepository.findById(id);
     }
 }

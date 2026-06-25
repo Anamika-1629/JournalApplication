@@ -1,5 +1,6 @@
 package dev.anamika.journalApp.services;
 
+import dev.anamika.journalApp.dto.JournalEntryRequest;
 import dev.anamika.journalApp.models.JournalEntry;
 import dev.anamika.journalApp.models.Users;
 import dev.anamika.journalApp.repositories.JournalEntryRepository;
@@ -23,26 +24,7 @@ public class JournalEntryService {
     @Autowired
     private UserService userService;
 
-    private Users validateOwnership(String userName, ObjectId id){
-        Users u = userService.findByUsername(userName).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-
-        boolean owns = u.getEntryIDs().stream().anyMatch(e -> e.getId().equals(id));
-        if (!owns) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access Denied");
-
-        return u;
-    }
-
-    public List<JournalEntry> getAllEntries(String userName){
-        Users user = userService.findByUsername(userName).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-        return user.getEntryIDs();
-    }
-
-    public Optional<JournalEntry> getOneEntry(ObjectId id, String userName){
-        validateOwnership(userName, id);
-
-        return journalEntryRepository.findById(id);
-    }
-
+    //Create new entry
     @Transactional
     public JournalEntry saveEntry(JournalEntry journalEntry, String userName) {
         Users user = userService.findByUsername(userName).
@@ -58,6 +40,20 @@ public class JournalEntryService {
         return entry;
     }
 
+    //Get all owned entries
+    public List<JournalEntry> getAllEntries(String userName){
+        Users user = userService.findByUsername(userName).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        return user.getEntryIDs();
+    }
+
+    //Get one owned entry
+    public Optional<JournalEntry> getOneEntry(ObjectId id, String userName){
+        validateOwnership(userName, id);
+
+        return journalEntryRepository.findById(id);
+    }
+
+    //Delete one entry
     public void deleteEntry(ObjectId id, String userName){
         Users user = validateOwnership(userName, id);
 
@@ -66,16 +62,28 @@ public class JournalEntryService {
         journalEntryRepository.deleteById(id);
     }
 
-    public JournalEntry updateEntry(ObjectId id, String userName, JournalEntry entry) {
+    //Update entry
+    public JournalEntry updateEntry(ObjectId id, String userName, JournalEntryRequest entry) {
         validateOwnership(userName,id);
-
         JournalEntry old = journalEntryRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entry Not Found"));
 
         old.setUpdatedAt(LocalDateTime.now());
-        old.setTitle(entry.getTitle() != null && !entry.getTitle().isEmpty() ? entry.getTitle() : old.getTitle());
-        old.setContent(entry.getContent() != null && !entry.getContent().isEmpty() ? entry.getContent() : old.getContent());
+
+        if (entry.getTitle() != null && !entry.getTitle().isBlank())
+            old.setTitle(entry.getTitle());
+        if (entry.getContent() != null && !entry.getContent().isBlank())
+            old.setContent(entry.getContent());
 
         journalEntryRepository.save(old);
         return old;
+    }
+
+    private Users validateOwnership(String userName, ObjectId id){
+        Users u = userService.findByUsername(userName).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+        boolean owns = u.getEntryIDs().stream().anyMatch(e -> e.getId().equals(id));
+        if (!owns) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access Denied");
+
+        return u;
     }
 }

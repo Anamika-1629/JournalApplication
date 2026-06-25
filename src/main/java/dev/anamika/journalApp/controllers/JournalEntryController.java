@@ -1,5 +1,6 @@
 package dev.anamika.journalApp.controllers;
 
+import dev.anamika.journalApp.dto.JournalEntryRequest;
 import dev.anamika.journalApp.models.JournalEntry;
 import dev.anamika.journalApp.services.JournalEntryService;
 import org.bson.types.ObjectId;
@@ -19,15 +20,15 @@ public class JournalEntryController {
     @Autowired
     private JournalEntryService journalEntryService;
 
-    @GetMapping("/v1/journal-entries")
-    public ResponseEntity<List<JournalEntry>> getAll(Authentication authentication){
-        return ResponseEntity.ok(journalEntryService.getAllEntries(authentication.getName()));
-    }
-
     @PostMapping("/v1/create-entries")
     public ResponseEntity<JournalEntry> createEntry(@RequestBody JournalEntry myEntry, Authentication authentication){
         JournalEntry saved = journalEntryService.saveEntry(myEntry, authentication.getName());
         return new ResponseEntity<>(saved, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/v1/journal-entries")
+    public ResponseEntity<List<JournalEntry>> getAll(Authentication authentication){
+        return ResponseEntity.ok(journalEntryService.getAllEntries(authentication.getName()));
     }
 
     @GetMapping("/v1/find-entry/{id}")
@@ -43,7 +44,7 @@ public class JournalEntryController {
     }
 
     @PutMapping("/v1/update-entry/{id}")
-    public ResponseEntity<JournalEntry> updateEntryById(@PathVariable ObjectId id, @RequestBody JournalEntry newEntry, Authentication authentication){
+    public ResponseEntity<JournalEntry> updateEntryById(@PathVariable ObjectId id, @RequestBody JournalEntryRequest newEntry, Authentication authentication){
         JournalEntry entry = journalEntryService.updateEntry(id, authentication.getName(), newEntry);
         return new ResponseEntity<>(entry, HttpStatus.OK);
     }
