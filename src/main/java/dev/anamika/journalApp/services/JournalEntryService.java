@@ -3,15 +3,15 @@ package dev.anamika.journalApp.services;
 import dev.anamika.journalApp.dto.JournalEntryRequest;
 import dev.anamika.journalApp.dto.JournalEntryUpdateRequest;
 import dev.anamika.journalApp.dto.JournalEntryResponse;
+import dev.anamika.journalApp.exception.MethodAccessDeniedException;
+import dev.anamika.journalApp.exception.ResourceNotFoundException;
 import dev.anamika.journalApp.models.JournalEntry;
 import dev.anamika.journalApp.models.Users;
 import dev.anamika.journalApp.repositories.JournalEntryRepository;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,10 +27,10 @@ public class JournalEntryService {
 
     //Helper method -> Validating the ownership of an entry
     private Users validateOwnership(String userName, ObjectId id){
-        Users u = userService.findByUsername(userName).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        Users u = userService.findByUsername(userName).orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         boolean owns = u.getEntryIDs().stream().anyMatch(e -> e.getId().equals(id));
-        if (!owns) throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access Denied");
+        if (!owns) throw new MethodAccessDeniedException("Access Denied");
 
         return u;
     }
@@ -50,7 +50,7 @@ public class JournalEntryService {
     @Transactional
     public JournalEntryResponse saveEntry(JournalEntryRequest dto, String userName) {
         Users user = userService.findByUsername(userName).
-                orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found"));
+                orElseThrow(()-> new ResourceNotFoundException("User Not Found"));
 
         JournalEntry journalEntry = new JournalEntry();
 
@@ -68,7 +68,7 @@ public class JournalEntryService {
 
     //Get all owned entries
     public List<JournalEntryResponse> getAllEntries(String userName){
-        Users user = userService.findByUsername(userName).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        Users user = userService.findByUsername(userName).orElseThrow(()-> new ResourceNotFoundException("User not found"));
         return user.getEntryIDs().stream()
                 .map(this::mapToResponse).toList();
     }
@@ -78,7 +78,7 @@ public class JournalEntryService {
         validateOwnership(userName, id);
 
         JournalEntry entry = journalEntryRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entry Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Entry Not Found"));
 
         return mapToResponse(entry);
     }
@@ -95,7 +95,7 @@ public class JournalEntryService {
     //Update entry
     public JournalEntryResponse updateEntry(ObjectId id, String userName, JournalEntryUpdateRequest entry) {
         validateOwnership(userName,id);
-        JournalEntry old = journalEntryRepository.findById(id).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Entry Not Found"));
+        JournalEntry old = journalEntryRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Entry Not Found"));
 
         boolean updated = false;
 

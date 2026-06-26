@@ -1,18 +1,19 @@
 package dev.anamika.journalApp.services;
 
 import dev.anamika.journalApp.dto.*;
+import dev.anamika.journalApp.exception.InvalidCredentialsException;
+import dev.anamika.journalApp.exception.InvalidRoleOperationException;
+import dev.anamika.journalApp.exception.ResourceNotFoundException;
 import dev.anamika.journalApp.models.Users;
 import dev.anamika.journalApp.repositories.JournalEntryRepository;
 import dev.anamika.journalApp.repositories.UserRepository;
 import dev.anamika.journalApp.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
@@ -50,9 +51,14 @@ public class UserService {
 
     //Public controller -> login api
     public String login(AuthRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUserName(), request.getPassword()));
-        return jwtUtils.generateToken(request.getUserName());
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getUserName(), request.getPassword()));
+            return jwtUtils.generateToken(request.getUserName());
+        }
+        catch (BadCredentialsException e){
+            throw new InvalidRoleOperationException("Invalid username or password");
+        }
     }
 
     //Save user method
@@ -63,7 +69,7 @@ public class UserService {
     //User controller -> update user api
     public UserResponse updateUser(UpdateUser dto, String username) {
         Users user = userRepository.findByUserName(username)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found"));
+                .orElseThrow(() -> new ResourceNotFoundException("User Not Found"));
 
         if (dto.getUserName() != null && !dto.getUserName().isBlank())
             user.setUserName(dto.getUserName());
@@ -80,10 +86,10 @@ public class UserService {
 
     //User controller -> change password api
     public void changePassword(ChangePassword dto, String username){
-        Users user = userRepository.findByUserName(username).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        Users user = userRepository.findByUserName(username).orElseThrow(()-> new ResourceNotFoundException("User not found"));
 
         if (!passwordEncoder.matches(dto.getOldPassword(), user.getPassword()))
-            throw new BadCredentialsException("Old password is incorrect");
+            throw new InvalidCredentialsException("Old password is incorrect");
 
         user.setPassword(passwordEncoder.encode(dto.getNewPassword()));
         userRepository.save(user);
@@ -91,7 +97,7 @@ public class UserService {
 
     //User controller -> delete user api
     public void deleteUser(String userName){
-        Users user = userRepository.findByUserName(userName).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "User Not Found"));
+        Users user = userRepository.findByUserName(userName).orElseThrow(()-> new ResourceNotFoundException("User Not Found"));
 
         journalEntryRepository.deleteAll(user.getEntryIDs());
         userRepository.delete(user);
@@ -117,16 +123,16 @@ public class UserService {
 
     //Admin controller -> update role of the users
     public UserResponse updateRoles(String username, List<String> roles){
-        Users user = userRepository.findByUserName(username).orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        Users user = userRepository.findByUserName(username).orElseThrow(()-> new ResourceNotFoundException("User not found"));
 
         if (user.getRoles().contains("ADMIN") && !roles.contains("ADMIN"))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot remove admin role from admin");
+            throw new InvalidRoleOperationException("Cannot remove admin role from admin");
 
         if (!roles.stream().allMatch(
                 role -> role.equals("USER") || role.equals("ADMIN")))
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid role");
+            throw new InvalidRoleOperationException("Invalid role");
 
-        if (roles.isEmpty()) throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Role list can't be empty");
+        if (roles.isEmpty()) throw new InvalidRoleOperationException("Role list can't be empty");
 
         user.setRoles(roles);
 
