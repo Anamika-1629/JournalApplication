@@ -2,6 +2,7 @@ package dev.anamika.journalApp.services;
 
 import dev.anamika.journalApp.models.Users;
 import dev.anamika.journalApp.repositories.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,6 +11,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
@@ -17,7 +19,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Users user = userRepository.findByUserName(username).orElseThrow(() -> new UsernameNotFoundException("No user found with the username: "+ username));
+        Users user = userRepository.findByUserName(username).orElseThrow(() -> {
+            log.warn("Authentication failed — no user found with username: '{}'", username);
+            return new UsernameNotFoundException("No user found with the username: "+ username);
+        });
 
         return User.builder()
                 .username(user.getUserName())
