@@ -14,6 +14,4 @@ public class JournalEntryResponse {
     private String title;
     private String content;
     private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-
 }
