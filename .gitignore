@@ -34,3 +34,9 @@ build/
 
 ### Environment Variables ###
 .env
+
+### Front-end ###
+node_modules
+dist
+.DS_Store
+*.local
