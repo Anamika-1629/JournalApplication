@@ -1,0 +1,108 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(248, 250, 252, 0.88);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-decoration: none;
+  letter-spacing: -0.02em;
+}
+
+.brandIcon {
+  color: var(--primary);
+}
+
+.brand:hover { color: var(--text-primary); }
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.navLink {
+  padding: 6px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: color var(--transition), background var(--transition);
+}
+
+.navLink:hover {
+  color: var(--text-primary);
+  background: var(--border-subtle);
+}
+
+.active {
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+.active:hover {
+  color: var(--primary-hover);
+  background: var(--primary-light);
+}
+
+.logoutBtn {
+  padding: 6px 14px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: color var(--transition), background var(--transition);
+  font-family: var(--font-body);
+}
+
+.logoutBtn:hover {
+  color: var(--error);
+  background: var(--error-light);
+}
+
+.cta {
+  padding: 7px 18px;
+  font-size: 14px;
+  font-weight: 500;
+  background: var(--primary);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  transition: background var(--transition), transform var(--transition);
+  margin-left: 6px;
+}
+
+.cta:hover {
+  background: var(--primary-hover);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 600px) {
+  .nav { padding: 0 16px; }
+  .navLink { padding: 6px 10px; }
+}
