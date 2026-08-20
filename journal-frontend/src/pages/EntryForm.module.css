@@ -1,0 +1,122 @@
+.page {
+  min-height: calc(100vh - 120px);
+  padding: 32px 0 60px;
+}
+
+.container {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px 0;
+  transition: color var(--transition);
+  font-family: var(--font-body);
+}
+
+.back:hover { color: var(--text-primary); }
+
+.actions {
+  display: flex;
+  gap: 10px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.titleWrap {
+  margin-bottom: 4px;
+}
+
+.titleInput {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: transparent;
+  padding: 0 0 16px;
+  border-bottom: 1.5px solid var(--border);
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+.titleInput::placeholder {
+  color: var(--text-muted);
+}
+
+.titleError {
+  border-bottom-color: var(--error);
+}
+
+.contentWrap {
+  margin-top: 24px;
+}
+
+.contentInput {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-family: var(--font-body);
+  font-size: 16px;
+  color: var(--text-primary);
+  background: transparent;
+  resize: none;
+  line-height: 1.85;
+  min-height: 400px;
+}
+
+.contentInput::placeholder {
+  color: var(--text-muted);
+}
+
+.contentError {
+  color: var(--error);
+}
+
+.errorMsg {
+  display: block;
+  font-size: 12px;
+  color: var(--error);
+  margin-top: 4px;
+}
+
+.meta {
+  padding-top: 16px;
+  border-top: 1px solid var(--border-subtle);
+  margin-top: 16px;
+}
+
+.wordCount {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+@media (max-width: 640px) {
+  .page { padding: 20px 0 48px; }
+  .container { padding: 0 16px; }
+  .titleInput { font-size: 24px; }
+  .contentInput { font-size: 15px; }
+}
